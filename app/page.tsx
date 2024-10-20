@@ -1,8 +1,11 @@
 import Image from "next/image";
-import { MedalCalculatorComponent  } from "@/components/medal-calculator";
+import { MedalCalculatorComponent } from "@/components/medal-calculator";
 
 export default function Home() {
   return (
-    <MedalCalculatorComponent  />
+    <main>
+      <h1>メダル計算機</h1>
+      <MedalCalculatorComponent />
+    </main>
   )
 }

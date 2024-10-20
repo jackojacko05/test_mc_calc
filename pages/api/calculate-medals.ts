@@ -82,6 +82,13 @@ function calculateOptimalRecipes(stock: Stock): { recipes: { [name: string]: num
     useIngredients(currentStock, recipes.find(r => r.name === bestRecipe)!.ingredients);
   }
 
+  // 作成回数が0のレシピを除外
+  Object.keys(optimalRecipes).forEach(key => {
+    if (optimalRecipes[key] === 0) {
+      delete optimalRecipes[key];
+    }
+  });
+
   return { recipes: optimalRecipes, medals: maxMedals };
 }
 

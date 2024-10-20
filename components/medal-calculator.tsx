@@ -137,8 +137,13 @@ export function MedalCalculatorComponent() {
               <CardTitle className="text-2xl text-gold twisted-wonderland-font">計算結果</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-lg">最適なレシピ: <span className="font-bold text-gold">{result.bestRecipe}</span></p>
-              <p className="text-lg">獲得メダル数: <span className="font-bold text-gold">{result.medals}</span></p>
+              <h2 className="text-xl font-semibold mb-2 text-gold twisted-wonderland-font">最適なレシピの組み合わせ:</h2>
+              {Object.entries(result.recipes).map(([recipe, count]) => (
+                <p key={recipe} className="text-lg">
+                  <span className="font-bold text-gold">{recipe}</span>: {count}回
+                </p>
+              ))}
+              <p className="text-lg mt-4">合計メダル数: <span className="font-bold text-gold">{result.medals}</span></p>
             </CardContent>
           </Card>
         )}
