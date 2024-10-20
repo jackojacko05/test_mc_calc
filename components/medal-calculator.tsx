@@ -12,7 +12,7 @@ type Material = 'spicyPowder' | 'flour' | 'cheese' | 'pizzaSauce' | 'meat' | 'ri
 type Quality = 'high' | 'medium' | 'low'
 
 interface Stock {
-  [key: Material]: {
+  [key: string]: {
     [key in Quality]: number
   }
 }
