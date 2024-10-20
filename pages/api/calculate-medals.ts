@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import * as Logic from 'logic-solver';
 
 type Material = 'spicyPowder' | 'flour' | 'cheese' | 'pizzaSauce' | 'meat' | 'rice' | 'onion';
 type Quality = 'high' | 'medium' | 'low';
@@ -58,14 +57,6 @@ export default async function handler(
 }
 
 function calculateOptimalRecipes(stock: Stock): { recipes: { [name: string]: number }, medals: number } {
-  const solver = new Logic.Solver();
-  const recipeVars: { [name: string]: any } = {};
-
-  // レシピ変数の定義
-  for (const recipe of recipes) {
-    recipeVars[recipe.name] = solver.variable(recipe.name);
-  }
-
   let optimalRecipes: { [name: string]: number } = {};
   let maxMedals = 0;
   let currentStock = JSON.parse(JSON.stringify(stock)) as Stock;
