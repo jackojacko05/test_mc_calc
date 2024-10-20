@@ -27,7 +27,7 @@ export function MedalCalculatorComponent() {
     rice: { high: 0, medium: 0, low: 0 },
     onion: { high: 0, medium: 0, low: 0 },
   })
-  const [result, setResult] = useState<{ bestRecipe: string; medals: number } | null>(null)
+  const [result, setResult] = useState<{ recipes: { [name: string]: number }, medals: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
