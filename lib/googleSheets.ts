@@ -6,6 +6,7 @@ const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
 const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY;
 
 if (!SPREADSHEET_ID || !GOOGLE_CLIENT_EMAIL || !GOOGLE_PRIVATE_KEY) {
+  console.error('Missing Google Sheets credentials');
   throw new Error('Missing Google Sheets credentials');
 }
 
@@ -20,8 +21,20 @@ const serviceAccountAuth = new JWT({
 const doc = new GoogleSpreadsheet(SPREADSHEET_ID, serviceAccountAuth);
 
 export async function getSheetData(sheetTitle: string) {
-  await doc.loadInfo();
-  const sheet = doc.sheetsByTitle[sheetTitle];
-  const rows = await sheet.getRows();
-  return rows.map(row => row.toObject());
+  try {
+    console.log(`Loading sheet: ${sheetTitle}`);
+    await doc.loadInfo();
+    const sheet = doc.sheetsByTitle[sheetTitle];
+    if (!sheet) {
+      console.error(`Sheet not found: ${sheetTitle}`);
+      throw new Error(`Sheet not found: ${sheetTitle}`);
+    }
+    console.log(`Fetching rows from sheet: ${sheetTitle}`);
+    const rows = await sheet.getRows();
+    console.log(`Fetched ${rows.length} rows from sheet: ${sheetTitle}`);
+    return rows.map(row => row.toObject());
+  } catch (error) {
+    console.error(`Error fetching data from sheet ${sheetTitle}:`, error);
+    throw error;
+  }
 }
