@@ -1,14 +1,14 @@
 export interface Material {
-  id: string;
+  code: string;
   name: string;
 }
 
 export const materials: Material[] = [
-  { id: 'spicyPowder', name: '辛味パウダー' },
-  { id: 'flour', name: '小麦粉' },
-  { id: 'cheese', name: 'チーズ' },
-  { id: 'pizzaSauce', name: 'ピザソース' },
-  { id: 'meat', name: '肉' },
-  { id: 'rice', name: '米' },
-  { id: 'onion', name: '玉ねぎ' },
+  { code: 'M001', name: '辛味パウダー' },
+  { code: 'M002', name: '小麦粉' },
+  { code: 'M003', name: 'チーズ' },
+  { code: 'M004', name: 'ピザソース' },
+  { code: 'M005', name: '肉' },
+  { code: 'M006', name: '米' },
+  { code: 'M007', name: '玉ねぎ' },
 ];

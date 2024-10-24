@@ -11,28 +11,34 @@ import { AlertCircle } from "lucide-react"
 type Quality = 'high' | 'medium' | 'low'
 
 interface Material {
-  id: string;
+  code: string;
   name: string;
 }
 
 interface Recipe {
-  id: string;
+  code: string;
   name: string;
-  ingredients: { [materialId: string]: number };
-  medals: number;
+  ingredients: { [materialCode: string]: number };
+  madols: number;
 }
 
 interface Stock {
-  [key: string]: {
+  [code: string]: {
     [key in Quality]: number
   }
+}
+
+interface CalculationResult {
+  recipes: { [name: string]: number };
+  medals: number;
+  madols: number;
 }
 
 export function MedalCalculatorComponent() {
   const [materials, setMaterials] = useState<Material[]>([])
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [stock, setStock] = useState<Stock>({})
-  const [result, setResult] = useState<{ recipes: { [name: string]: number }, medals: number } | null>(null)
+  const [result, setResult] = useState<CalculationResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -57,7 +63,7 @@ export function MedalCalculatorComponent() {
         // 初期の在庫状態を設定
         const initialStock: Stock = {}
         materialsData.forEach(material => {
-          initialStock[material.id] = { high: 0, medium: 0, low: 0 }
+          initialStock[material.code] = { high: 0, medium: 0, low: 0 }
         })
         setStock(initialStock)
       } catch (error) {
@@ -69,36 +75,40 @@ export function MedalCalculatorComponent() {
     fetchData()
   }, [])
 
-  const handleInputChange = (materialId: string, quality: Quality, value: string) => {
+  const handleInputChange = (materialCode: string, quality: Quality, value: string) => {
     setStock(prevStock => ({
       ...prevStock,
-      [materialId]: {
-        ...prevStock[materialId],
+      [materialCode]: {
+        ...prevStock[materialCode],
         [quality]: parseInt(value) || 0
       }
     }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-    setResult(null)
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setResult(null);
+
+    console.log('Submitting data:', { stock, recipes });
 
     try {
       const response = await fetch('/api/calculate-medals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stock, recipes })
-      })
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
       const data = await response.json()
-      if (data.error) {
-        throw new Error(data.error)
+      console.log('Received data:', data)
+
+      if ('error' in data) {
+        throw new Error(data.error as string)
       }
 
       setResult(data)
@@ -121,20 +131,20 @@ export function MedalCalculatorComponent() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {materials.map(material => (
-                <div key={material.id} className="bg-black bg-opacity-50 p-4 rounded-md border border-gold">
+                <div key={material.code} className="bg-black bg-opacity-50 p-4 rounded-md border border-gold">
                   <h3 className="text-xl mb-2 text-gold twisted-wonderland-font">{material.name}</h3>
                   <div className="grid grid-cols-3 gap-4">
                     {(['high', 'medium', 'low'] as const).map(quality => (
                       <div key={quality}>
-                        <Label htmlFor={`${material.id}-${quality}`} className="text-sm text-light-gold mb-1 block">
+                        <Label htmlFor={`${material.code}-${quality}`} className="text-sm text-light-gold mb-1 block">
                           {quality === 'high' ? '高品質' : quality === 'medium' ? '中品質' : '低品質'}
                         </Label>
                         <Input
-                          id={`${material.id}-${quality}`}
+                          id={`${material.code}-${quality}`}
                           type="number"
                           min="0"
-                          value={stock[material.id]?.[quality] || 0}
-                          onChange={(e) => handleInputChange(material.id, quality, e.target.value)}
+                          value={stock[material.code]?.[quality] || 0}
+                          onChange={(e) => handleInputChange(material.code, quality, e.target.value)}
                           className="bg-dark-gray border-gold text-white focus:ring-gold focus:border-gold"
                         />
                       </div>
@@ -166,15 +176,16 @@ export function MedalCalculatorComponent() {
             </CardHeader>
             <CardContent>
               <h2 className="text-xl font-semibold mb-2 text-gold twisted-wonderland-font">最適なレシピの組み合わせ:</h2>
-              {Object.entries(result.recipes).map(([recipeId, count]) => {
-                const recipe = recipes.find(r => r.id === recipeId);
+              {Object.entries(result.recipes).map(([recipeCode, count]) => {
+                const recipe = recipes.find(r => r.code === recipeCode);
                 return (
-                  <p key={recipeId} className="text-lg">
-                    <span className="font-bold text-gold">{recipe?.name || recipeId}</span>: {count}回
+                  <p key={recipeCode} className="text-lg">
+                    <span className="font-bold text-gold">{recipe?.name || recipeCode}</span>: {count}回
                   </p>
                 );
               })}
               <p className="text-lg mt-4">合計メダル数: <span className="font-bold text-gold">{result.medals}</span></p>
+              <p className="text-lg">合計マドル数: <span className="font-bold text-gold">{result.madols}</span></p>
             </CardContent>
           </Card>
         )}

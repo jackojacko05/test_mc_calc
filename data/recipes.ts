@@ -1,150 +1,182 @@
 export interface Recipe {
-  id: string;
+  code: string;
   name: string;
-  ingredients: { [materialId: string]: number };
-  medals: number;
+  ingredients: { [materialCode: string]: number };
+  madols: number;
 }
 
 export const recipes: Recipe[] = [
   {
-    id: 'biryani',
+    code: 'R001',
     name: 'ビリヤニ',
     ingredients: {
-      spicyPowder: 1,
-      rice: 1,
-      onion: 1,
-      meat: 1,
+      M001: 1, // 辛味パウダー
+      M006: 1, // 米
+      M007: 1, // 玉ねぎ
+      M005: 1, // 肉
     },
-    medals: 100,
+    madols: 1000,
   },
   {
-    id: 'jalapeno_pizza',
+    code: 'R002',
     name: 'ハラペーニョと鷹の爪ピザ',
     ingredients: {
-      spicyPowder: 1,
-      flour: 1,
-      cheese: 1,
-      pizzaSauce: 1,
+      M001: 1, // 辛味パウダー
+      M002: 1, // 小麦粉
+      M003: 1, // チーズ
+      M004: 1, // ピザソース
     },
-    medals: 100,
+    madols: 1000,
   },
   {
-    id: 'jambalaya',
+    code: 'R003',
     name: 'ジャンバラヤ',
     ingredients: {
-      spicyPowder: 1,
-      rice: 1,
-      onion: 1,
-      meat: 1,
+      M001: 1, // 辛味パウダー
+      M006: 1, // 米
+      M007: 1, // 玉ねぎ
+      M005: 1, // 肉
     },
-    medals: 100,
+    madols: 1000,
   },
   {
-    id: 'curry_rice',
+    code: 'R004',
     name: 'カレーライス',
     ingredients: {
-      spicyPowder: 1,
-      rice: 1,
-      onion: 1,
-      meat: 1,
+      M001: 1, // 辛味パウダー
+      M006: 1, // 米
+      M007: 1, // 玉ねぎ
+      M005: 1, // 肉
     },
-    medals: 100,
+    madols: 1000,
   },
   {
-    id: 'peperoncino',
+    code: 'R005',
     name: 'ペペロンチーノ',
     ingredients: {
-      spicyPowder: 1,
-      flour: 1,
-      cheese: 1,
-      onion: 1,
+      M001: 1, // 辛味パウダー
+      M002: 1, // 小麦粉
+      M003: 1, // チーズ
+      M007: 1, // 玉ねぎ
     },
-    medals: 100,
+    madols: 1000,
   },
   {
-    id: 'lasagna',
+    code: 'R006',
     name: 'ラザニア',
     ingredients: {
-      flour: 1,
-      cheese: 1,
-      pizzaSauce: 1,
-      meat: 1,
+      M002: 1, // 小麦粉
+      M003: 1, // チーズ
+      M004: 1, // ピザソース
+      M005: 1, // 肉
     },
-    medals: 100,
+    madols: 1000,
   },
   {
-    id: 'meat_sauce_spaghetti',
+    code: 'R007',
     name: 'ミートソーススパゲッティ',
     ingredients: {
-      flour: 1,
-      cheese: 1,
-      pizzaSauce: 1,
-      meat: 1,
-      onion: 1,
+      M002: 1, // 小麦粉
+      M003: 1, // チーズ
+      M004: 1, // ピザソース
+      M005: 1, // 肉
+      M007: 1, // 玉ねぎ
     },
-    medals: 100,
+    madols: 1000,
   },
   {
-    id: 'margherita_pizza',
+    code: 'R008',
     name: 'ピザマルゲリータ',
     ingredients: {
-      flour: 1,
-      cheese: 1,
-      pizzaSauce: 1,
+      M002: 1, // 小麦粉
+      M003: 1, // チーズ
+      M004: 1, // ピザソース
     },
-    medals: 80,
+    madols: 800,
   },
   {
-    id: 'napolitan',
+    code: 'R009',
     name: 'ナポリタン',
     ingredients: {
-      flour: 1,
-      cheese: 1,
-      pizzaSauce: 1,
-      onion: 1,
+      M002: 1, // 小麦粉
+      M003: 1, // チーズ
+      M004: 1, // ピザソース
+      M007: 1, // 玉ねぎ
     },
-    medals: 80,
+    madols: 800,
   },
   {
-    id: 'doria',
+    code: 'R010',
     name: 'ドリア',
     ingredients: {
-      flour: 1,
-      cheese: 1,
-      rice: 1,
-      meat: 1,
+      M002: 1, // 小麦粉
+      M003: 1, // チーズ
+      M006: 1, // 米
+      M005: 1, // 肉
     },
-    medals: 80,
+    madols: 800,
   },
   {
-    id: 'risotto',
+    code: 'R011',
     name: 'リゾット',
     ingredients: {
-      cheese: 1,
-      rice: 1,
-      meat: 1,
-      onion: 1,
+      M003: 1, // チーズ
+      M006: 1, // 米
+      M005: 1, // 肉
+      M007: 1, // 玉ねぎ
     },
-    medals: 80,
+    madols: 800,
   },
   {
-    id: 'omurice',
+    code: 'R012',
     name: 'オムライス',
     ingredients: {
-      rice: 1,
-      meat: 1,
-      onion: 1,
+      M006: 1, // 米
+      M005: 1, // 肉
+      M007: 1, // 玉ねぎ
     },
-    medals: 60,
+    madols: 600,
   },
   {
-    id: 'cheese_risotto',
+    code: 'R013',
     name: 'チーズリゾット',
     ingredients: {
-      cheese: 1,
-      rice: 1,
-      onion: 1,
+      M003: 1, // チーズ
+      M006: 1, // 米
+      M007: 1, // 玉ねぎ
     },
-    medals: 60,
+    madols: 600,
+  },
+  {
+    code: 'R014',
+    name: 'アラビアータ',
+    ingredients: {
+      M001: 1, // 辛味パウダー
+      M002: 1, // 小麦粉
+      M004: 1, // ピザソース
+      M007: 1, // 玉ねぎ
+    },
+    madols: 1000,
+  },
+  {
+    code: 'R015',
+    name: 'エビチリ',
+    ingredients: {
+      M001: 1, // 辛味パウダー
+      M005: 1, // 肉（この場合はエビ）
+      M007: 1, // 玉ねぎ
+    },
+    madols: 1000,
+  },
+  {
+    code: 'R016',
+    name: 'カレー',
+    ingredients: {
+      M001: 1, // 辛味パウダー
+      M005: 1, // 肉
+      M006: 1, // 米
+      M007: 1, // 玉ねぎ
+    },
+    madols: 1000,
   },
 ];
