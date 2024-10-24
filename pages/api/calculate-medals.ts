@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { Recipe } from '@/data/recipes';
 
 type Material = 'spicyPowder' | 'flour' | 'cheese' | 'pizzaSauce' | 'meat' | 'rice' | 'onion';
 type Quality = 'high' | 'medium' | 'low';
@@ -8,34 +9,6 @@ type Stock = {
     [Q in Quality]: number;
   };
 };
-
-interface Recipe {
-  name: string;
-  ingredients: {
-    [K in Material]?: number;
-  };
-}
-
-const recipes: Recipe[] = [
-  {
-    name: 'ビリヤニ',
-    ingredients: {
-      spicyPowder: 1,
-      rice: 1,
-      onion: 1,
-      meat: 1,
-    },
-  },
-  {
-    name: 'ハラペーニョと鷹の爪ピザ',
-    ingredients: {
-      spicyPowder: 1,
-      flour: 1,
-      cheese: 1,
-      pizzaSauce: 1,
-    },
-  },
-];
 
 const qualityPoints: { [K in Quality]: number } = {
   high: 30,
@@ -48,21 +21,21 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === 'POST') {
-    const stock = req.body as Stock;
-    const result = calculateOptimalRecipes(stock);
+    const { stock, recipes } = req.body;
+    const result = calculateOptimalRecipes(stock, recipes);
     res.status(200).json(result);
   } else {
     res.status(405).end();
   }
 }
 
-function calculateOptimalRecipes(stock: Stock): { recipes: { [name: string]: number }, medals: number } {
+function calculateOptimalRecipes(stock: Stock, recipes: Recipe[]): { recipes: { [name: string]: number }, medals: number } {
   let optimalRecipes: { [name: string]: number } = {};
   let maxMedals = 0;
   let currentStock = JSON.parse(JSON.stringify(stock)) as Stock;
 
   while (true) {
-    let bestRecipe: string | null = null;
+    let bestRecipe: Recipe | null = null;
     let bestMedals = 0;
 
     for (const recipe of recipes) {
@@ -70,16 +43,16 @@ function calculateOptimalRecipes(stock: Stock): { recipes: { [name: string]: num
         const medals = calculateMedalsForRecipe(currentStock, recipe.ingredients);
         if (medals > bestMedals) {
           bestMedals = medals;
-          bestRecipe = recipe.name;
+          bestRecipe = recipe;
         }
       }
     }
 
     if (bestRecipe === null) break;
 
-    optimalRecipes[bestRecipe] = (optimalRecipes[bestRecipe] || 0) + 1;
+    optimalRecipes[bestRecipe.name] = (optimalRecipes[bestRecipe.name] || 0) + 1;
     maxMedals += bestMedals;
-    useIngredients(currentStock, recipes.find(r => r.name === bestRecipe)!.ingredients);
+    useIngredients(currentStock, bestRecipe.ingredients);
   }
 
   // 作成回数が0のレシピを除外
@@ -93,11 +66,12 @@ function calculateOptimalRecipes(stock: Stock): { recipes: { [name: string]: num
 }
 
 function canMake(stock: Stock, ingredients: Recipe['ingredients']): boolean {
-  for (const material in ingredients) {
-    const materialKey = material as Material;
+  for (const materialKey in ingredients) {
     const requiredAmount = ingredients[materialKey] || 0;
     if (requiredAmount > 0) {
-      const availableQuantity = Object.values(stock[materialKey]).reduce((sum, qty) => sum + qty, 0);
+      const materialStock = stock[materialKey as Material];
+      if (!materialStock) return false;
+      const availableQuantity = Object.values(materialStock).reduce((sum, qty) => sum + qty, 0);
       if (availableQuantity < requiredAmount) {
         return false;
       }
@@ -111,18 +85,20 @@ function calculateMedalsForRecipe(
   ingredients: Recipe['ingredients']
 ): number {
   let totalMedals = 0;
-  for (const material in ingredients) {
-    const materialKey = material as Material;
+  for (const materialKey in ingredients) {
     const requiredAmount = ingredients[materialKey] || 0;
     if (requiredAmount > 0) {
       let remainingAmount = requiredAmount;
-      for (const quality in qualityPoints) {
-        const qualityKey = quality as Quality;
-        const availableQuantity = stock[materialKey][qualityKey];
-        const usedQuantity = Math.min(availableQuantity, remainingAmount);
-        totalMedals += qualityPoints[qualityKey] * usedQuantity;
-        remainingAmount -= usedQuantity;
-        if (remainingAmount <= 0) break;
+      const materialStock = stock[materialKey as Material];
+      if (materialStock) {
+        for (const quality in qualityPoints) {
+          const qualityKey = quality as Quality;
+          const availableQuantity = materialStock[qualityKey];
+          const usedQuantity = Math.min(availableQuantity, remainingAmount);
+          totalMedals += qualityPoints[qualityKey] * usedQuantity;
+          remainingAmount -= usedQuantity;
+          if (remainingAmount <= 0) break;
+        }
       }
     }
   }
@@ -130,18 +106,20 @@ function calculateMedalsForRecipe(
 }
 
 function useIngredients(stock: Stock, ingredients: Recipe['ingredients']): void {
-  for (const material in ingredients) {
-    const materialKey = material as Material;
+  for (const materialKey in ingredients) {
     const requiredAmount = ingredients[materialKey] || 0;
     if (requiredAmount > 0) {
       let remainingAmount = requiredAmount;
-      for (const quality in qualityPoints) {
-        const qualityKey = quality as Quality;
-        const availableQuantity = stock[materialKey][qualityKey];
-        const usedQuantity = Math.min(availableQuantity, remainingAmount);
-        stock[materialKey][qualityKey] -= usedQuantity;
-        remainingAmount -= usedQuantity;
-        if (remainingAmount <= 0) break;
+      const materialStock = stock[materialKey as Material];
+      if (materialStock) {
+        for (const quality in qualityPoints) {
+          const qualityKey = quality as Quality;
+          const availableQuantity = materialStock[qualityKey];
+          const usedQuantity = Math.min(availableQuantity, remainingAmount);
+          materialStock[qualityKey] -= usedQuantity;
+          remainingAmount -= usedQuantity;
+          if (remainingAmount <= 0) break;
+        }
       }
     }
   }
