@@ -48,32 +48,34 @@ export function MedalCalculatorComponent() {
         const [materialsResponse, recipesResponse] = await Promise.all([
           fetch('/api/materials'),
           fetch('/api/recipes')
-        ])
+        ]);
 
         if (!materialsResponse.ok || !recipesResponse.ok) {
-          throw new Error('データの取得に失敗しました')
+          const materialsError = await materialsResponse.text();
+          const recipesError = await recipesResponse.text();
+          throw new Error(`データの取得に失敗しました。Materials: ${materialsError}, Recipes: ${recipesError}`);
         }
 
-        const materialsData: Material[] = await materialsResponse.json()
-        const recipesData: Recipe[] = await recipesResponse.json()
+        const materialsData: Material[] = await materialsResponse.json();
+        const recipesData: Recipe[] = await recipesResponse.json();
 
-        setMaterials(materialsData)
-        setRecipes(recipesData)
+        setMaterials(materialsData);
+        setRecipes(recipesData);
         
         // 初期の在庫状態を設定
-        const initialStock: Stock = {}
+        const initialStock: Stock = {};
         materialsData.forEach(material => {
-          initialStock[material.code] = { high: 0, medium: 0, low: 0 }
-        })
-        setStock(initialStock)
+          initialStock[material.code] = { high: 0, medium: 0, low: 0 };
+        });
+        setStock(initialStock);
       } catch (error) {
-        console.error('Error fetching data:', error)
-        setError('データの読み込み中にエラーが発生しました')
+        console.error('Error fetching data:', error);
+        setError(error instanceof Error ? error.message : 'データの読み込み中に不明なエラーが発生しました');
       }
-    }
+    };
 
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   const handleInputChange = (materialCode: string, quality: Quality, value: string) => {
     setStock(prevStock => ({
