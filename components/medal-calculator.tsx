@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -8,59 +8,109 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 
-type Material = 'spicyPowder' | 'flour' | 'cheese' | 'pizzaSauce' | 'meat' | 'rice' | 'onion'
 type Quality = 'high' | 'medium' | 'low'
 
+interface Material {
+  code: string;
+  name: string;
+}
+
+interface Recipe {
+  code: string;
+  name: string;
+  ingredients: { [materialCode: string]: number };
+  madols: number;
+}
+
 interface Stock {
-  [key: string]: {
+  [code: string]: {
     [key in Quality]: number
   }
 }
 
+interface CalculationResult {
+  recipes: { [name: string]: number };
+  medals: number;
+  madols: number;
+}
+
 export function MedalCalculatorComponent() {
-  const [stock, setStock] = useState<Stock>({
-    spicyPowder: { high: 0, medium: 0, low: 0 },
-    flour: { high: 0, medium: 0, low: 0 },
-    cheese: { high: 0, medium: 0, low: 0 },
-    pizzaSauce: { high: 0, medium: 0, low: 0 },
-    meat: { high: 0, medium: 0, low: 0 },
-    rice: { high: 0, medium: 0, low: 0 },
-    onion: { high: 0, medium: 0, low: 0 },
-  })
-  const [result, setResult] = useState<{ recipes: { [name: string]: number }, medals: number } | null>(null)
+  const [materials, setMaterials] = useState<Material[]>([])
+  const [recipes, setRecipes] = useState<Recipe[]>([])
+  const [stock, setStock] = useState<Stock>({})
+  const [result, setResult] = useState<CalculationResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleInputChange = (material: Material, quality: Quality, value: string) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [materialsResponse, recipesResponse] = await Promise.all([
+          fetch('/api/materials'),
+          fetch('/api/recipes')
+        ]);
+
+        if (!materialsResponse.ok || !recipesResponse.ok) {
+          const materialsError = await materialsResponse.text();
+          const recipesError = await recipesResponse.text();
+          throw new Error(`データの取得に失敗しました。Materials: ${materialsError}, Recipes: ${recipesError}`);
+        }
+
+        const materialsData: Material[] = await materialsResponse.json();
+        const recipesData: Recipe[] = await recipesResponse.json();
+
+        setMaterials(materialsData);
+        setRecipes(recipesData);
+        
+        // 初期の在庫状態を設定
+        const initialStock: Stock = {};
+        materialsData.forEach(material => {
+          initialStock[material.code] = { high: 0, medium: 0, low: 0 };
+        });
+        setStock(initialStock);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError(error instanceof Error ? error.message : 'データの読み込み中に不明なエラーが発生しました');
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleInputChange = (materialCode: string, quality: Quality, value: string) => {
     setStock(prevStock => ({
       ...prevStock,
-      [material]: {
-        ...prevStock[material],
+      [materialCode]: {
+        ...prevStock[materialCode],
         [quality]: parseInt(value) || 0
       }
     }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-    setResult(null)
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setResult(null);
+
+    console.log('Submitting data:', { stock, recipes });
 
     try {
       const response = await fetch('/api/calculate-medals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(stock)
-      })
+        body: JSON.stringify({ stock, recipes })
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
       const data = await response.json()
-      if (data.error) {
-        throw new Error(data.error)
+      console.log('Received data:', data)
+
+      if ('error' in data) {
+        throw new Error(data.error as string)
       }
 
       setResult(data)
@@ -71,16 +121,6 @@ export function MedalCalculatorComponent() {
       setIsLoading(false)
     }
   }
-
-  const materials: { id: Material; name: string }[] = [
-    { id: 'spicyPowder', name: '辛味パウダー' },
-    { id: 'flour', name: '小麦粉' },
-    { id: 'cheese', name: 'チーズ' },
-    { id: 'pizzaSauce', name: 'ピザソース' },
-    { id: 'meat', name: '肉' },
-    { id: 'rice', name: '米' },
-    { id: 'onion', name: '玉ねぎ' },
-  ]
 
   return (
     <div className="min-h-screen bg-black text-white py-12 px-4 sm:px-6 lg:px-8 twisted-wonderland-bg">
@@ -93,20 +133,20 @@ export function MedalCalculatorComponent() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {materials.map(material => (
-                <div key={material.id} className="bg-black bg-opacity-50 p-4 rounded-md border border-gold">
+                <div key={material.code} className="bg-black bg-opacity-50 p-4 rounded-md border border-gold">
                   <h3 className="text-xl mb-2 text-gold twisted-wonderland-font">{material.name}</h3>
                   <div className="grid grid-cols-3 gap-4">
                     {(['high', 'medium', 'low'] as const).map(quality => (
                       <div key={quality}>
-                        <Label htmlFor={`${material.id}-${quality}`} className="text-sm text-light-gold mb-1 block">
+                        <Label htmlFor={`${material.code}-${quality}`} className="text-sm text-light-gold mb-1 block">
                           {quality === 'high' ? '高品質' : quality === 'medium' ? '中品質' : '低品質'}
                         </Label>
                         <Input
-                          id={`${material.id}-${quality}`}
+                          id={`${material.code}-${quality}`}
                           type="number"
                           min="0"
-                          value={stock[material.id][quality]}
-                          onChange={(e) => handleInputChange(material.id, quality, e.target.value)}
+                          value={stock[material.code]?.[quality] || 0}
+                          onChange={(e) => handleInputChange(material.code, quality, e.target.value)}
                           className="bg-dark-gray border-gold text-white focus:ring-gold focus:border-gold"
                         />
                       </div>
@@ -138,12 +178,16 @@ export function MedalCalculatorComponent() {
             </CardHeader>
             <CardContent>
               <h2 className="text-xl font-semibold mb-2 text-gold twisted-wonderland-font">最適なレシピの組み合わせ:</h2>
-              {Object.entries(result.recipes).map(([recipe, count]) => (
-                <p key={recipe} className="text-lg">
-                  <span className="font-bold text-gold">{recipe}</span>: {count}回
-                </p>
-              ))}
+              {Object.entries(result.recipes).map(([recipeCode, count]) => {
+                const recipe = recipes.find(r => r.code === recipeCode);
+                return (
+                  <p key={recipeCode} className="text-lg">
+                    <span className="font-bold text-gold">{recipe?.name || recipeCode}</span>: {count}回
+                  </p>
+                );
+              })}
               <p className="text-lg mt-4">合計メダル数: <span className="font-bold text-gold">{result.medals}</span></p>
+              <p className="text-lg">合計マドル数: <span className="font-bold text-gold">{result.madols}</span></p>
             </CardContent>
           </Card>
         )}
