@@ -144,7 +144,7 @@ export function MedalCalculatorComponent() {
       <div className="max-w-3xl mx-auto">
         <Card className="bg-dark-gray text-white p-6 rounded-lg shadow-lg mb-8 border border-gold">
           <CardHeader>
-            <CardTitle className="text-2xl text-gold twisted-wonderland-font">材料在庫</CardTitle>
+            <CardTitle className="text-2xl text-gold twisted-wonderland-font">食材在庫</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -202,7 +202,7 @@ export function MedalCalculatorComponent() {
                     <table className="min-w-full table-auto border-collapse">
                       <thead>
                         <tr className="border-b border-gray-700">
-                          <th className="px-4 py-2 text-left text-light-gold">素材</th>
+                          <th className="px-4 py-2 text-left text-light-gold">食材</th>
                           <th className="px-4 py-2 text-center text-light-gold">高品質</th>
                           <th className="px-4 py-2 text-center text-light-gold">中品質</th>
                           <th className="px-4 py-2 text-center text-light-gold">低品質</th>
