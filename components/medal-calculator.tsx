@@ -95,13 +95,21 @@ export function MedalCalculatorComponent() {
   }, []);
 
   const handleInputChange = (materialCode: string, quality: Quality, value: string) => {
-    setStock(prevStock => ({
-      ...prevStock,
-      [materialCode]: {
-        ...prevStock[materialCode],
-        [quality]: parseInt(value) || 0
+    // 入力値を事前に変換
+    const numValue = parseInt(value) || 0;
+    
+    // React の状態更新を最適化
+    setStock(prevStock => {
+      const newStock = { ...prevStock };
+      if (!newStock[materialCode]) {
+        newStock[materialCode] = { high: 0, medium: 0, low: 0 };
       }
-    }))
+      newStock[materialCode] = {
+        ...newStock[materialCode],
+        [quality]: numValue
+      };
+      return newStock;
+    });
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
