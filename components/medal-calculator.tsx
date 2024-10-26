@@ -133,7 +133,7 @@ export function MedalCalculatorComponent() {
       setResult(data)
     } catch (error) {
       console.error('Error calculating medals:', error)
-      setError(error instanceof Error ? error.message : '計算中にエラーが発生しました。')
+      setError(error instanceof Error ? error.message : '計算中にエラー発生しました。')
     } finally {
       setIsLoading(false)
     }
@@ -142,7 +142,6 @@ export function MedalCalculatorComponent() {
   return (
     <div className="min-h-screen bg-black text-white py-12 px-4 sm:px-6 lg:px-8 twisted-wonderland-bg">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center text-gold twisted-wonderland-font">メダル計算機</h1>
         <Card className="bg-dark-gray text-white p-6 rounded-lg shadow-lg mb-8 border border-gold">
           <CardHeader>
             <CardTitle className="text-2xl text-gold twisted-wonderland-font">材料在庫</CardTitle>
@@ -245,12 +244,20 @@ export function MedalCalculatorComponent() {
               )}
 
               <div className="mt-4 p-4 bg-dark-gray rounded-lg">
-                <p className="text-lg">合計メダル数: <span className="font-bold text-gold">{result.medals}</span></p>
+                <p className="text-lg">合計メダル数(期待値): <span className="font-bold text-gold">{result.medals}</span></p>
                 <p className="text-lg">合計マドル数: <span className="font-bold text-gold">{result.madols}</span></p>
               </div>
             </CardContent>
           </Card>
         )}
+        <div className="mt-8 text-center text-gray-400 text-sm">
+          <p className="mb-2">
+            作成者: <a href="https://twitter.com/jackojacko_" target="_blank" rel="noopener noreferrer" className="text-gold hover:text-light-gold">@jackojacko_</a> / <a href="https://github.com/jackojacko05/twst_mc_calc" target="_blank" rel="noopener noreferrer" className="text-gold hover:text-light-gold">GitHub</a>
+          </p>
+          <p>
+            改善点はTwitterのDM、ないしGitHubへの直接のPRも歓迎です
+          </p>
+        </div>
       </div>
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
