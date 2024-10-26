@@ -28,10 +28,27 @@ interface Stock {
   }
 }
 
+interface UsedMaterialDetail {
+  materialCode: string;
+  high: number;
+  medium: number;
+  low: number;
+}
+
+interface RecipeDetail {
+  recipeName: string;
+  count: number;
+  materials: UsedMaterialDetail[];
+  medals: number;
+  madols: number;
+}
+
 interface CalculationResult {
   recipes: { [name: string]: number };
   medals: number;
   madols: number;
+  charcoalDetails?: { materials: [string, string], count: number }[];
+  recipeDetails: RecipeDetail[];
 }
 
 export function MedalCalculatorComponent() {
@@ -116,7 +133,7 @@ export function MedalCalculatorComponent() {
       setResult(data)
     } catch (error) {
       console.error('Error calculating medals:', error)
-      setError(error instanceof Error ? error.message : '計算中にエラーが発生しました。')
+      setError(error instanceof Error ? error.message : '計算中にエラー発生しました。')
     } finally {
       setIsLoading(false)
     }
@@ -125,7 +142,6 @@ export function MedalCalculatorComponent() {
   return (
     <div className="min-h-screen bg-black text-white py-12 px-4 sm:px-6 lg:px-8 twisted-wonderland-bg">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center text-gold twisted-wonderland-font">メダル計算機</h1>
         <Card className="bg-dark-gray text-white p-6 rounded-lg shadow-lg mb-8 border border-gold">
           <CardHeader>
             <CardTitle className="text-2xl text-gold twisted-wonderland-font">材料在庫</CardTitle>
@@ -177,20 +193,71 @@ export function MedalCalculatorComponent() {
               <CardTitle className="text-2xl text-gold twisted-wonderland-font">計算結果</CardTitle>
             </CardHeader>
             <CardContent>
-              <h2 className="text-xl font-semibold mb-2 text-gold twisted-wonderland-font">最適なレシピの組み合わせ:</h2>
-              {Object.entries(result.recipes).map(([recipeCode, count]) => {
-                const recipe = recipes.find(r => r.code === recipeCode);
-                return (
-                  <p key={recipeCode} className="text-lg">
-                    <span className="font-bold text-gold">{recipe?.name || recipeCode}</span>: {count}回
-                  </p>
-                );
-              })}
-              <p className="text-lg mt-4">合計メダル数: <span className="font-bold text-gold">{result.medals}</span></p>
-              <p className="text-lg">合計マドル数: <span className="font-bold text-gold">{result.madols}</span></p>
+              <h2 className="text-xl font-semibold mb-4 text-gold twisted-wonderland-font">最適なレシピの組み合わせ:</h2>
+              
+              {result.recipeDetails.map((detail, index) => (
+                <div key={index} className="mb-6 bg-dark-gray p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gold mb-2">{detail.recipeName}</h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full table-auto border-collapse">
+                      <thead>
+                        <tr className="border-b border-gray-700">
+                          <th className="px-4 py-2 text-left text-light-gold">素材</th>
+                          <th className="px-4 py-2 text-center text-light-gold">高品質</th>
+                          <th className="px-4 py-2 text-center text-light-gold">中品質</th>
+                          <th className="px-4 py-2 text-center text-light-gold">低品質</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {detail.materials.map((material, mIndex) => (
+                          <tr key={mIndex} className="border-b border-gray-700">
+                            <td className="px-4 py-2">
+                              {materials.find(m => m.code === material.materialCode)?.name}
+                            </td>
+                            <td className="px-4 py-2 text-center">{material.high}</td>
+                            <td className="px-4 py-2 text-center">{material.medium}</td>
+                            <td className="px-4 py-2 text-center">{material.low}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="mt-2 text-sm text-gray-300">
+                    獲得メダル: {detail.medals} / 獲得マドル: {detail.madols}
+                  </div>
+                </div>
+              ))}
+
+              {result.charcoalDetails && (
+                <div className="mb-6 bg-dark-gray p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-gold mb-2">炭</h3>
+                  {result.charcoalDetails.map((detail, index) => (
+                    <p key={index} className="text-sm text-gray-300">
+                      {materials.find(m => m.code === detail.materials[0])?.name} + {' '}
+                      {materials.find(m => m.code === detail.materials[1])?.name}: {detail.count}回
+                    </p>
+                  ))}
+                  <div className="mt-2 text-sm text-gray-300">
+                    獲得メダル: 3 / 獲得マドル: 350
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-4 p-4 bg-dark-gray rounded-lg">
+                <p className="text-lg">合計メダル数(期待値): <span className="font-bold text-gold">{result.medals}</span></p>
+                <p className="text-lg">合計マドル数: <span className="font-bold text-gold">{result.madols}</span></p>
+              </div>
             </CardContent>
           </Card>
         )}
+        <div className="mt-8 text-center text-gray-400 text-sm">
+          <p className="mb-2">
+            作成者: <a href="https://twitter.com/jackojacko_" target="_blank" rel="noopener noreferrer" className="text-gold hover:text-light-gold">@jackojacko_</a> / <a href="https://github.com/jackojacko05/twst_mc_calc" target="_blank" rel="noopener noreferrer" className="text-gold hover:text-light-gold">GitHub</a>
+          </p>
+          <p>
+            改善点はTwitterのDM、ないしGitHubへの直接のPRも歓迎です
+          </p>
+        </div>
       </div>
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
